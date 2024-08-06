@@ -3,7 +3,7 @@ import random
 
 class RedBlueNim:
     def __init__(self, red_pile, blue_pile, game_version, first_player='computer', depth=None):
-        # """
+        
         # Initialize the game with the given number of stones in each pile.
 
         # Args:
@@ -12,7 +12,7 @@ class RedBlueNim:
         #     game_version (str): The version of the game. Can be either 'standard' or 'misere'.
         #     first_player (str): The first player. Can be either 'computer' or 'human'.
         #     depth (int): Search depth for AI (optional).
-        # """
+        
         if not isinstance(red_pile, int) or not isinstance(blue_pile, int):
             raise ValueError("Both red_pile and blue_pile must be integers.")
         if red_pile < 0 or blue_pile < 0:
@@ -29,9 +29,9 @@ class RedBlueNim:
         self.depth = depth
 
     def play_game(self):
-        # """
+        
         # Play the game until one of the piles is empty.
-        # """
+        
         initial_red_pile = self.red_pile
         initial_blue_pile = self.blue_pile
 
