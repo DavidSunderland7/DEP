@@ -86,29 +86,83 @@ class RedBlueNim:
             score = self.red_pile * 2 + self.blue_pile * 3
         print(f"Final score: {score}")
 
-        # Calculate the score
-# if self.game_version == 'standard':
-#     if self.red_pile == 0 and self.blue_pile == 0:
-#         print("It's a tie! Final score: 0")
-#     else:
-#         score = self.red_pile * 2 + self.blue_pile * 3
-#         print(f"Final score: {score}")
-# elif self.game_version == 'misere':
-#     if self.red_pile == 0 or self.blue_pile == 0:
-#         print("Player 1 wins!")
-#     else:
-#         print("Player 2 wins!")
-#     score = self.red_pile * 2 + self.blue_pile * 3
-#     print(f"Final score: {score}")
- 
+        def minimax(self, red_pile, blue_pile, depth, alpha, beta, is_maximizing):
+    # Base case: if the game is over, return the score
+    if red_pile == 0 and blue_pile == 0:
+        if self.game_version == 'standard':
+            return ('', 0)
+        elif self.game_version == 'misere':
+            return ('', -1)
+    elif red_pile == 0:
+        if self.game_version == 'standard':
+            return ('', -1)
+        elif self.game_version == 'misere':
+            return ('', 1)
+    elif blue_pile == 0:
+        if self.game_version == 'standard':
+            return ('', 1)
+        elif self.game_version == 'misere':
+            return ('', -1)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Play a game of RedBlueNim.')
-    parser.add_argument('--num-red', type=int, help='Number of red marbles.', required=True)
-    parser.add_argument('--num-blue', type=int, help='Number of blue marbles.', required=True)
-    parser.add_argument('--version', choices=['standard', 'misere'], default='standard', help='The version of the game.')
-    parser.add_argument('--first-player', choices=['computer', 'human'], default='computer', help='The first player.')
-    parser.add_argument('--depth', type=int, help='Search depth for AI (optional)')
+    if depth == 0:
+        return ('', self.heuristic(red_pile, blue_pile))
+
+    if is_maximizing:
+        best_move = ('', -float('inf'))
+        for move in self.get_possible_moves(red_pile, blue_pile):
+            if move == 'r':
+                new_red_pile = red_pile - 1
+                new_blue_pile = blue_pile
+            elif move == 'b':
+                new_red_pile = red_pile
+                new_blue_pile = blue_pile - 1
+            score = self.minimax(new_red_pile, new_blue_pile, depth - 1, alpha, beta, False)[1]
+            if score > best_move[1]:
+                best_move = (move, score)
+            alpha = max(alpha, score)
+            if beta <= alpha:
+                break
+        return best_move
+    else:
+        best_move = ('', float('inf'))
+        for move in self.get_possible_moves(red_pile, blue_pile):
+            if move == 'r':
+                new_red_pile = red_pile - 1
+                new_blue_pile = blue_pile
+            elif move == 'b':
+                new_red_pile = red_pile
+                new_blue_pile = blue_pile - 1
+            score = self.minimax(new_red_pile, new_blue_pile, depth - 1, alpha, beta, True)[1]
+            if score < best_move[1]:
+                best_move = (move, score)
+            beta = min(beta, score)
+            if beta <= alpha:
+                break
+        return best_move
+
+def get_possible_moves(self, red_pile, blue_pile):
+    possible_moves = []
+    if red_pile > 0:
+        possible_moves.append('r')
+    if blue_pile > 0:
+        possible_moves.append('b')
+    return possible_moves
+
+def heuristic(self, red_pile, blue_pile):
+    # A simple heuristic function that favors the player with more stones
+    if self.game_version == 'standard':
+        return red_pile - blue_pile
+    elif self.game_version == 'misere':
+        return blue_pile - red_pile
+
+
+    if __name__ == "__main__":
+        parser = argparse.ArgumentParser(description='Play a game of RedBlueNim.')
+        parser.add_argument('--num-red', type=int, help='Number of red marbles.', required=True)
+        parser.add_argument('--num-blue', type=int, help='Number of blue marbles.', required=True)
+        parser.add_argument('--version', choices=['standard', 'misere'], default='standard', help='The version of the game.')
+        parser.add_argument('--first-player', choices=['computer', 'human'], default='computer', help='The first player.')
+        parser.add_argument('--depth', type=int, help='Search depth for AI (optional)')
 
     args = parser.parse_args()
     game = RedBlueNim(args.num_red, args.num_blue, args.version, first_player=args.first_player, depth=args.depth)
