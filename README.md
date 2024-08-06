@@ -1,2 +1,3 @@
 # DEP
-Workspace for internship at Digital Empowerment Pakistan
+My first project of internship work at Digital Impowerment Network.
+Project details: Nim game, with Minmax algorithm, alpha-beta prunning method and heuristic function.!

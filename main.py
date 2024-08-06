@@ -1,16 +1,18 @@
+#start the game using a script which Initialize the game with the given number of stones in each pile.
+# Use this script in terminal : python main.py --num-red 15 --num-blue 15
+# you can initialize nums of red and blue marbles as you wish !
+
+import argparse
 import random
 
 class RedBlueNim:
     def __init__(self, red_pile, blue_pile, game_version, first_player='computer', depth=None):
         
-        #Initialize the game with the given number of stones in each pile.
-
-        #Args:
-            # red_pile (int): The number of stones in the red pile.
-            # blue_pile (int): The number of stones in the blue pile.
-            # game_version (str): The version of the game. Can be either 'standard' or 'misere'.
-            # first_player (str): The first player. Can be either 'computer' or 'human'.
-            # depth (int): Search depth for AI (optional).
+        #     red_pile (int): The number of stones in the red pile.
+        #     blue_pile (int): The number of stones in the blue pile.
+        #     game_version (str): The version of the game. Can be either 'standard' or 'misere'.
+        #     first_player (str): The first player. Can be either 'computer' or 'human'.
+        #     depth (int): Search depth for AI (optional).
         
         if not isinstance(red_pile, int) or not isinstance(blue_pile, int):
             raise ValueError("Both red_pile and blue_pile must be integers.")
@@ -29,10 +31,13 @@ class RedBlueNim:
 
     def play_game(self):
         
-        #Play the game until one of the piles is empty.
+        # Play the game until one of the piles is empty.
         
+        initial_red_pile = self.red_pile
+        initial_blue_pile = self.blue_pile
+        print("Welcome Nim-(By Python) game..!")
         while self.red_pile > 0 and self.blue_pile > 0:
-            print(f"Welcome to the Nim_Python...! \n Initial Marbles : RED_marbles:{self.red_pile}, BLUE_marbles:{self.blue_pile}")
+            print(f"\n Initial Marbles : RED_marbles:{self.red_pile}, BLUE_marbles:{self.blue_pile}")
             # Player 1's turn
             print("Player 1's turn:")
             while True:
@@ -82,6 +87,84 @@ class RedBlueNim:
             score = self.red_pile * 2 + self.blue_pile * 3
         print(f"Final score: {score}")
 
-# Create a new game with 10 stones in each pile, where the first player is 'human'
-game = RedBlueNim(10, 10, 'standard', first_player='human')
-game.play_game()
+    def minimax(self, red_pile, blue_pile, depth, alpha, beta, is_maximizing):
+        # Base case: if the game is over, return the score
+        if red_pile == 0 and blue_pile == 0:
+            if self.game_version == 'standard':
+                return ('', 0)
+            elif self.game_version == 'misere':
+                return ('', -1)
+        elif red_pile == 0:
+            if self.game_version == 'standard':
+                return ('', -1)
+            elif self.game_version == 'misere':
+                return ('', 1)
+        elif blue_pile == 0:
+            if self.game_version == 'standard':
+                return ('', 1)
+            elif self.game_version == 'misere':
+                return ('', -1)
+
+        if depth == 0:
+            return ('', self.heuristic(red_pile, blue_pile))
+
+        if is_maximizing:
+            best_move = ('', -float('inf'))
+            for move in self.get_possible_moves(red_pile, blue_pile):
+                if move == 'r':
+                    new_red_pile = red_pile - 1
+                    new_blue_pile = blue_pile
+                elif move == 'b':
+                    new_red_pile = red_pile
+                    new_blue_pile = blue_pile - 1
+                score = self.minimax(new_red_pile, new_blue_pile, depth - 1, alpha, beta, False)[1]
+                if score > best_move[1]:
+                    best_move = (move, score)
+                alpha = max(alpha, score)
+                if beta <= alpha:
+                    break
+            return best_move
+        else:
+            best_move = ('', float('inf'))
+            for move in self.get_possible_moves(red_pile, blue_pile):
+                if move == 'r':
+                    new_red_pile = red_pile - 1
+                    new_blue_pile = blue_pile
+                elif move == 'b':
+                    new_red_pile = red_pile
+                    new_blue_pile = blue_pile - 1
+                score = self.minimax(new_red_pile, new_blue_pile, depth - 1, alpha, beta, True)[1]
+                if score < best_move[1]:
+                    best_move = (move, score)
+                beta = min(beta, score)
+                if beta <= alpha:
+                    break
+            return best_move
+
+    def get_possible_moves(self, red_pile, blue_pile):
+        possible_moves = []
+        if red_pile > 0:
+            possible_moves.append('r')
+        if blue_pile > 0:
+            possible_moves.append('b')
+        return possible_moves
+
+    def heuristic(self, red_pile, blue_pile):
+        # A simple heuristic function that favors the player with more stones
+        if self.game_version == 'standard':
+            return red_pile - blue_pile
+        elif self.game_version == 'misere':
+            return blue_pile - red_pile
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Play a game of RedBlueNim.')
+    parser.add_argument('--num-red', type=int, help='Number of red marbles.', required=True)
+    parser.add_argument('--num-blue', type=int, help='Number of blue marbles.', required=True)
+    parser.add_argument('--version', choices=['standard', 'misere'], default='standard', help='The version of the game.')
+    parser.add_argument('--first-player', choices=['computer', 'human'], default='computer', help='The first player.')
+    parser.add_argument('--depth', type=int, help='Search depth for AI (optional)')
+
+    args = parser.parse_args()
+    game = RedBlueNim(args.num_red, args.num_blue, args.version, first_player=args.first_player, depth=args.depth)
+    game.play_game()
